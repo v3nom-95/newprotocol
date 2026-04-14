@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
 from hashlib import sha256
+import json
 from typing import Iterable
 
-from pqcrypto.dilithium import sign_payload
+from pqcrypto.dilithium import sign_payload, verify_signature
 from utils.security import decrypt_secret
 from config.settings import settings
 
@@ -15,6 +16,11 @@ class TransactionService:
     def sign_transaction_payload(self, payload: dict, encrypted_private_key: str) -> str:
         private_key = decrypt_secret(encrypted_private_key, settings.aes_master_key)
         return sign_payload(payload, private_key)
+
+    @staticmethod
+    def verify_transaction_payload(payload: dict, signature: str, public_key: str) -> bool:
+        raw = json.dumps(payload, sort_keys=True).encode("utf-8")
+        return verify_signature(raw, signature, public_key)
 
     def estimate_wallet_features(self, recent_timestamps: Iterable[datetime]) -> tuple[int, float]:
         timestamps = sorted(recent_timestamps)
