@@ -21,6 +21,8 @@ class WalletService:
             "did_hash": did_hash,
             "pq_public_key": keys["public_key"],
             "encrypted_pq_private_key": encrypted_private,
+            "pq_algorithm": "Dilithium2",
+            "key_version": "1",
         }
 
 
