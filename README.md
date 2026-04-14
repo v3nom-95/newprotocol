@@ -29,6 +29,7 @@ Quantum-Secure AI-Powered Trust Protocol with modular layers:
   - `getRiskScore(address user)`
 
 Deploy to Sepolia using your preferred toolchain (Hardhat/Foundry/Remix), then place deployed addresses in `backend/.env`.
+To enable live on-chain anchoring from the API, also set `RELAYER_PRIVATE_KEY` in backend env.
 
 ## Backend Setup
 

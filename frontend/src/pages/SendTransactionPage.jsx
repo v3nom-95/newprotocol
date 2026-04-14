@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useProtocolStore } from "../store/useProtocolStore";
 
 export default function SendTransactionPage() {
-  const { currentAddress, riskScore, sendTransaction } = useProtocolStore();
+  const { currentAddress, riskScore, predictedRisk, predictRisk, sendTransaction } = useProtocolStore();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
 
@@ -16,14 +16,27 @@ export default function SendTransactionPage() {
     });
   };
 
+  const runPrediction = async () => {
+    if (!currentAddress || !amount) return;
+    await predictRisk(currentAddress, Number(amount));
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">Send Transaction</h2>
-      <div className="rounded border border-slate-800 p-4">Predicted/Current Risk: {riskScore.toFixed(2)}</div>
+      <div className="rounded border border-slate-800 p-4">
+        Predicted Risk: {predictedRisk ? predictedRisk.risk_score.toFixed(2) : "N/A"} | Current Risk:{" "}
+        {riskScore.toFixed(2)}
+      </div>
       <form onSubmit={submit} className="space-y-2">
         <input value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="Recipient address" className="w-full rounded bg-slate-900 p-2" />
         <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount ETH" className="w-full rounded bg-slate-900 p-2" />
-        <button className="rounded bg-emerald-600 px-4 py-2">Submit</button>
+        <div className="flex gap-2">
+          <button type="button" onClick={runPrediction} className="rounded bg-indigo-600 px-4 py-2">
+            Predict Risk
+          </button>
+          <button className="rounded bg-emerald-600 px-4 py-2">Submit</button>
+        </div>
       </form>
     </div>
   );

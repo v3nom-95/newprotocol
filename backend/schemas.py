@@ -21,6 +21,16 @@ class TransactionCreateRequest(BaseModel):
     eth_tx_hash: str
 
 
+class TransactionRiskPredictRequest(BaseModel):
+    sender: str
+    amount_eth: float = Field(gt=0)
+
+
+class TransactionRiskPredictResponse(BaseModel):
+    risk_score: float
+    anomaly_flag: bool
+
+
 class TransactionResponse(BaseModel):
     eth_tx_hash: str
     metadata_hash: str

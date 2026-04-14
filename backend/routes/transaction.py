@@ -7,13 +7,36 @@ from db import get_db
 from models.identity import Identity
 from models.risk import RiskScore
 from models.transaction import Transaction
-from schemas import TransactionCreateRequest, TransactionResponse
+from schemas import (
+    TransactionCreateRequest,
+    TransactionResponse,
+    TransactionRiskPredictRequest,
+    TransactionRiskPredictResponse,
+)
 from services.ai_service import ai_service
 from services.blockchain_service import blockchain_service
 from services.transaction_service import transaction_service
 
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
+
+
+@router.post("/predict-risk", response_model=TransactionRiskPredictResponse)
+def predict_risk(payload: TransactionRiskPredictRequest, db: Session = Depends(get_db)):
+    recent_cutoff = datetime.utcnow() - timedelta(hours=1)
+    recent_txs = (
+        db.query(Transaction)
+        .filter(Transaction.sender == payload.sender, Transaction.created_at >= recent_cutoff)
+        .all()
+    )
+    tx_count_last_hour, mean_interval_seconds = transaction_service.estimate_wallet_features(
+        [tx.created_at for tx in recent_txs]
+    )
+    wallet_activity_ratio = min(1.0, tx_count_last_hour / 20.0)
+    risk = ai_service.evaluate(
+        payload.amount_eth, tx_count_last_hour, mean_interval_seconds, wallet_activity_ratio
+    )
+    return TransactionRiskPredictResponse(risk_score=risk.risk_score, anomaly_flag=risk.anomaly_flag)
 
 
 @router.post("", response_model=TransactionResponse)

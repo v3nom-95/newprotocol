@@ -5,6 +5,7 @@ export const useProtocolStore = create((set, get) => ({
   currentAddress: "",
   riskScore: 0,
   transactions: [],
+  predictedRisk: null,
   identity: null,
   setCurrentAddress: (address) => set({ currentAddress: address }),
   fetchIdentity: async (address) => {
@@ -22,6 +23,13 @@ export const useProtocolStore = create((set, get) => ({
   fetchTransactions: async (address) => {
     const { data } = await api.get(`/transactions/${address}`);
     set({ transactions: data });
+  },
+  predictRisk: async (sender, amountEth) => {
+    const { data } = await api.post("/transactions/predict-risk", {
+      sender,
+      amount_eth: Number(amountEth),
+    });
+    set({ predictedRisk: data });
   },
   sendTransaction: async (payload) => {
     await api.post("/transactions", payload);

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     feature_scaler_path: str = "../ai-engine/artifacts/scaler.joblib"
     aes_master_key: str = "change-me-in-env"
     rpc_url: str = "https://sepolia.infura.io/v3/your-key"
+    relayer_private_key: str = ""
     identity_registry_address: str = "0x0000000000000000000000000000000000000000"
     tx_registry_address: str = "0x0000000000000000000000000000000000000000"
     risk_registry_address: str = "0x0000000000000000000000000000000000000000"
