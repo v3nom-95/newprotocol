@@ -5,7 +5,6 @@
 # 🌌 Q-AI Chain Protocol
 ### *Quantum-Secure AI-Powered Trust Protocol*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Stability: Stable](https://img.shields.io/badge/Status-Protocol--Ready-brightgreen)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)]()
 
