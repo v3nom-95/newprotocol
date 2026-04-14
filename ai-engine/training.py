@@ -1,4 +1,6 @@
 from pathlib import Path
+import json
+from datetime import datetime, timezone
 
 import joblib
 import numpy as np
@@ -26,6 +28,14 @@ def train() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     joblib.dump(model, out_dir / "isolation_forest.joblib")
     joblib.dump(scaler, out_dir / "scaler.joblib")
+    metadata = {
+        "model_name": "IsolationForest",
+        "features": ["amount_eth", "tx_frequency", "time_interval", "wallet_activity"],
+        "trained_at": datetime.now(timezone.utc).isoformat(),
+        "contamination": 0.05,
+        "n_estimators": 200,
+    }
+    (out_dir / "model_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     print(f"Saved model artifacts in {out_dir}")
 
 
