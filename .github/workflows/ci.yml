@@ -47,7 +47,7 @@ jobs:
       - name: Install contract tooling
         run: |
           cd contracts
-          npm ci
+          npm install
       - name: Run contract tests
         run: |
           cd contracts

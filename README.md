@@ -1,147 +1,64 @@
-# Q-AI Chain
+# Q-AI Chain Trust Protocol
 
-Quantum-Secure AI-Powered Trust Protocol with modular layers:
-- Q-DID identity (PQ + Ethereum)
-- AI fraud scoring
-- Blockchain anchoring contracts
-- FastAPI backend
-- React dashboard
-- JavaScript SDK
+Quantum-Secure AI-Powered Trust Protocol providing a modular stack for identity verification, fraud detection, and blockchain anchoring.
 
-## Project Structure
+## 🚀 Quick Start
 
-`contracts/` Solidity registries  
-`backend/` FastAPI protocol server  
-`ai-engine/` IsolationForest training + inference model  
-`frontend/` React + Tailwind dashboard  
-`sdk/` Developer SDK (ethers.js v6 + API clients)  
-`infra/` Docker Compose + optional Nginx
+For detailed step-by-step instructions on deployment and local development, please refer to the [Setup Guide](SETUP_GUIDE.md).
 
-## Smart Contracts
+## 📂 Project Structure
 
-- `IdentityRegistry.sol`
-  - `registerIdentity(address user, bytes32 didHash)`
-  - `getIdentity(address user)`
-- `TransactionRegistry.sol`
-  - `storeTransaction(bytes32 txHash, bytes pqSignature, bytes32 metadataHash)`
-- `RiskRegistry.sol`
-  - `storeRiskScore(address user, uint256 score)`
-  - `getRiskScore(address user)`
+- `contracts/` - Solidity registries (Identity, Transactions, Risk)
+- `backend/` - FastAPI protocol server with PQC integration
+- `ai-engine/` - IsolationForest training and inference artifacts
+- `frontend/` - React + Tailwind dashboard for protocol visualization
+- `sdk/` - Developer SDK (ethers.js v6 + API clients)
+- `infra/` - Docker Compose and Nginx configuration
 
-Deploy to Sepolia using your preferred toolchain (Hardhat/Foundry/Remix), then place deployed addresses in `backend/.env`.
-To enable live on-chain anchoring from the API, also set `RELAYER_PRIVATE_KEY` in backend env.
+---
 
-## Backend Setup
+## 🛠 Project Components
 
-1. Copy env:
-   - `backend/.env.example` -> `backend/.env`
-2. Install:
-   - `cd backend`
-   - `python -m pip install -r requirements.txt`
-3. Train AI model:
-   - `cd ../ai-engine`
-   - `python training.py`
-4. Run API:
-   - `cd ../backend`
-   - `uvicorn main:app --reload --host 0.0.0.0 --port 8000`
+### Smart Contracts
+Registries for decentralized identity and on-chain risk scoring.
+- `IdentityRegistry.sol`: Manage user DIDs.
+- `TransactionRegistry.sol`: Securely store PQC signed transactions.
+- `RiskRegistry.sol`: Anchor risk scores on-chain.
 
-API base: `http://localhost:8000/api/v1`
+### AI Engine
+Fraud detection via an Isolation Forest anomaly detection model.
+- Automatically trained to detect malicious patterns in protocol transactions.
 
-Key endpoints:
-- `POST /auth/login`
-- `POST /auth/refresh`
-- `POST /identity` (role: `admin|service`)
-- `GET /identity/{eth_address}` (role: `admin|service|user`)
-- `POST /transactions/predict-risk`
-- `POST /transactions` (role: `admin|service`)
-- `GET /transactions/{eth_address}`
-- `GET /risk/{eth_address}`
-- `GET /metrics?token=...`
+### Backend Protocol
+Unified API layer that coordinates AI scoring, authentication, and blockchain relay.
+- Integrated with PQC (Post-Quantum Cryptography) for secure signatures.
 
-Default local users for development:
-- `admin@qai.local` / `Admin@123`
-- `service@qai.local` / `Service@123`
-- `user@qai.local` / `User@123`
+### Frontend Dashboard
+Real-time dashboard for managing identities and monitoring risk across the network.
 
-## Frontend Setup
+### SDK
+Simplify integration for external services to interact with the trust protocol.
 
-1. `cd frontend`
-2. `npm install`
-3. Copy `.env.example` to `.env` if needed
-4. `npm run dev`
+---
 
-Pages included:
-- Dashboard
-- Identity
-- Send Transaction
-- Transaction Explorer
-- Admin Panel
+## 🏗 High-Level Deployment
 
-## SDK Setup
+1. **Deploy Contracts**: Use Hardhat in the `contracts` folder.
+2. **Environment Configuration**: Set `.env` files in `backend`, `contracts`, and `frontend`.
+3. **Train AI Engine**: Run `training.py` in `ai-engine`.
+4. **Run Services**: Start the backend and frontend locally or via `infra/` docker-compose.
 
-1. `cd sdk`
-2. `npm install`
+---
 
-Exports:
-- `createWallet()`
-- `sendTransaction()`
-- `getRiskScore()`
-- `getTransactions()`
+## 🛡 Security & Design
 
-Example:
+- **Quantum Security**: PQ private keys are encrypted and stored securely.
+- **Relayer Path**: Advanced relayer with nonce management and idempotency.
+- **Modularity**: Components can be deployed independently as needed.
 
-```js
-import { createWallet, sendTransaction, getRiskScore } from "qai-chain-sdk";
-```
+---
 
-## Docker Setup (Development)
+## 🤝 Contribution
 
-From `infra/`:
+This repository is optimized for the protocol's core functionality. Test files and build artifacts are excluded to maintain a clean protocol workspace.
 
-```bash
-docker compose up -d
-```
-
-Services:
-- PostgreSQL: `5432`
-- Redis: `6379`
-- Backend: `8000`
-- Frontend: `5173`
-
-## Docker Setup (Production-like)
-
-From `infra/`:
-
-```bash
-docker compose -f docker-compose.prod.yml up -d --build
-```
-
-This profile runs backend/frontend containers behind Nginx on port `80`.
-
-## Database Migrations
-
-```bash
-cd backend
-alembic upgrade head
-```
-
-## Security Notes
-
-- PQ private keys are AES-encrypted before DB storage.
-- Backend enforces request rate limits, JWT auth, and RBAC on protected endpoints.
-- Inputs are validated with Pydantic schemas.
-- Relayer path uses retries, nonce-from-pending, idempotency cache, and dead-letter status tracking.
-- Never commit real secrets to source control.
-
-## Testing
-
-- Backend: `cd backend && pytest -q`
-- Frontend build: `cd frontend && npm run build`
-- Contracts: `cd contracts && npm install && npm test`
-- Load baseline: `k6 run tests/load/transactions.js`
-
-## Production Runbooks
-
-- Release checklist: `docs/release-checklist.md`
-- Rollback runbook: `docs/rollback-runbook.md`
-- Architecture notes: `docs/architecture.md`
