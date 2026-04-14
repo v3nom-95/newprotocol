@@ -48,11 +48,20 @@ To enable live on-chain anchoring from the API, also set `RELAYER_PRIVATE_KEY` i
 API base: `http://localhost:8000/api/v1`
 
 Key endpoints:
-- `POST /identity`
-- `GET /identity/{eth_address}`
-- `POST /transactions`
+- `POST /auth/login`
+- `POST /auth/refresh`
+- `POST /identity` (role: `admin|service`)
+- `GET /identity/{eth_address}` (role: `admin|service|user`)
+- `POST /transactions/predict-risk`
+- `POST /transactions` (role: `admin|service`)
 - `GET /transactions/{eth_address}`
 - `GET /risk/{eth_address}`
+- `GET /metrics?token=...`
+
+Default local users for development:
+- `admin@qai.local` / `Admin@123`
+- `service@qai.local` / `Service@123`
+- `user@qai.local` / `User@123`
 
 ## Frontend Setup
 
@@ -85,7 +94,7 @@ Example:
 import { createWallet, sendTransaction, getRiskScore } from "qai-chain-sdk";
 ```
 
-## Docker Setup
+## Docker Setup (Development)
 
 From `infra/`:
 
@@ -99,25 +108,40 @@ Services:
 - Backend: `8000`
 - Frontend: `5173`
 
+## Docker Setup (Production-like)
+
+From `infra/`:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+This profile runs backend/frontend containers behind Nginx on port `80`.
+
+## Database Migrations
+
+```bash
+cd backend
+alembic upgrade head
+```
+
 ## Security Notes
 
 - PQ private keys are AES-encrypted before DB storage.
-- Backend enforces request rate limits.
+- Backend enforces request rate limits, JWT auth, and RBAC on protected endpoints.
 - Inputs are validated with Pydantic schemas.
+- Relayer path uses retries, nonce-from-pending, idempotency cache, and dead-letter status tracking.
 - Never commit real secrets to source control.
 
-## Current Scope (MVP)
+## Testing
 
-This implementation provides a working protocol scaffold and end-to-end flow:
-1. Create identity
-2. Generate/store PQ keys
-3. Anchor identity hash
-4. Submit transaction metadata + PQ signature
-5. Compute AI risk score
-6. Persist/anchor risk
-7. Visualize in dashboard
+- Backend: `cd backend && pytest -q`
+- Frontend build: `cd frontend && npm run build`
+- Contracts: `cd contracts && npm install && npm test`
+- Load baseline: `k6 run tests/load/transactions.js`
 
-Next recommended steps:
-- Replace blockchain anchor stubs with live contract calls.
-- Integrate real `oqs-python` runtime for Dilithium/Kyber in production containers.
-- Add auth, audit logging, and automated tests.
+## Production Runbooks
+
+- Release checklist: `docs/release-checklist.md`
+- Rollback runbook: `docs/rollback-runbook.md`
+- Architecture notes: `docs/architecture.md`
