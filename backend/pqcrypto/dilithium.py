@@ -4,6 +4,8 @@ import hmac
 import json
 from typing import Dict
 
+from config.settings import settings
+
 
 def _try_oqs():
     try:
@@ -25,6 +27,8 @@ def generate_keypair() -> Dict[str, str]:
                 "private_key": base64.b64encode(secret_key).decode(),
             }
 
+    if settings.production_mode:
+        raise RuntimeError("oqs-python provider required in production mode")
     seed = hashlib.sha256(b"qai-dev-dilithium-fallback").digest()
     return {
         "public_key": base64.b64encode(seed).decode(),
@@ -39,6 +43,8 @@ def sign_data(data: bytes, private_key: str) -> str:
         with oqs.Signature("Dilithium2", secret_key=key_bytes) as signer:
             signature = signer.sign(data)
             return base64.b64encode(signature).decode()
+    if settings.production_mode:
+        raise RuntimeError("Fallback signature mode disabled in production mode")
     digest = hmac.new(key_bytes, data, hashlib.sha256).digest()
     return base64.b64encode(digest).decode()
 
@@ -50,6 +56,8 @@ def verify_signature(data: bytes, signature: str, public_key: str) -> bool:
     if oqs:
         with oqs.Signature("Dilithium2") as verifier:
             return verifier.verify(data, sig_bytes, key_bytes)
+    if settings.production_mode:
+        return False
     expected = hmac.new(key_bytes, data, hashlib.sha256).digest()
     return hmac.compare_digest(expected, sig_bytes)
 
